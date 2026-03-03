@@ -54,7 +54,7 @@ int main() {
                 // dequeue(&q) fonksiyonu çağrılacak
                 break;
             case 3:
-                // printQueue(&q) fonksiyonu çağrılacak
+                // printQueue(&q) fonksiyonu çağrılacak.
                 break;
             case 4:
                 free(q.mesajlar);
@@ -66,6 +66,5 @@ int main() {
                 break;
         }
     }
-
     return 0;
 }
