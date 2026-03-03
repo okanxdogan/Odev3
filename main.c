@@ -11,11 +11,11 @@ typedef struct {
 
 // 2. Mesajların beklediği kuyruk yapısı
 typedef struct {
-    CAN_Mesaj *mesajlar;    // Dinamik dizi pointer'ı [cite: 42, 48]
-    int kapasite;           // Maksimum kapasite [cite: 43]
-    int front;              // İşlenecek ilk mesajın indeksi [cite: 44]
-    int rear;               // Yeni eklenecek mesajın indeksi [cite: 45]
-    int count;              // Anlık mesaj sayısı [cite: 46]
+    CAN_Mesaj *mesajlar;    
+    int kapasite;           
+    int front;              
+    int rear;               
+    int count;              
 } MesajKuyrugu;
 
 int main() {
