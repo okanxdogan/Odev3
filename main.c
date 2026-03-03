@@ -48,13 +48,13 @@ int main() {
 
         switch (secim) {
             case 1:
-                // enqueue(&q) fonksiyonu çağrılacak [cite: 52]
+                // enqueue(&q) fonksiyonu çağrılacak
                 break;
             case 2:
-                // dequeue(&q) fonksiyonu çağrılacak [cite: 55]
+                // dequeue(&q) fonksiyonu çağrılacak
                 break;
             case 3:
-                // printQueue(&q) fonksiyonu çağrılacak [cite: 58]
+                // printQueue(&q) fonksiyonu çağrılacak
                 break;
             case 4:
                 free(q.mesajlar);
