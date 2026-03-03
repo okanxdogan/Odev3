@@ -11,11 +11,11 @@ typedef struct {
 
 // 2. Mesajların beklediği kuyruk yapısı
 typedef struct {
-    CAN_Mesaj *mesajlar;    // Dinamik dizi pointer'ı [cite: 42, 48]
-    int kapasite;           // Maksimum kapasite [cite: 43]
-    int front;              // İşlenecek ilk mesajın indeksi [cite: 44]
-    int rear;               // Yeni eklenecek mesajın indeksi [cite: 45]
-    int count;              // Anlık mesaj sayısı [cite: 46]
+    CAN_Mesaj *mesajlar;    
+    int kapasite;           
+    int front;              
+    int rear;               
+    int count;              
 } MesajKuyrugu;
 
 int main() {
@@ -48,13 +48,13 @@ int main() {
 
         switch (secim) {
             case 1:
-                // enqueue(&q) fonksiyonu çağrılacak [cite: 52]
+                // enqueue(&q) fonksiyonu çağrılacak
                 break;
             case 2:
-                // dequeue(&q) fonksiyonu çağrılacak [cite: 55]
+                // dequeue(&q) fonksiyonu çağrılacak
                 break;
             case 3:
-                // printQueue(&q) fonksiyonu çağrılacak [cite: 58]
+                // printQueue(&q) fonksiyonu çağrılacak
                 break;
             case 4:
                 free(q.mesajlar);
