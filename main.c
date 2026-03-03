@@ -48,10 +48,10 @@ int main() {
 
         switch (secim) {
             case 1:
-                // enqueue(&q) fonksiyonu çağrılacak
+                // enqueue(&q) fonksiyonu çağrılacak.
                 break;
             case 2:
-                // dequeue(&q) fonksiyonu çağrılacak
+                // dequeue(&q) fonksiyonu çağrılacak.
                 break;
             case 3:
                 // printQueue(&q) fonksiyonu çağrılacak.
