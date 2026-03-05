@@ -1,105 +1,79 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "can_queue.h"
+#include "can_queue.h" // Struct tanımları ve prototipler dahil edilir 
 
-// ─────────────────────────────────────────────
-//  Kuyruğu Oluştur (Dynamic Memory Allocation)
-// ─────────────────────────────────────────────
-MesajKuyrugu kuyruk_olustur(int kapasite) {
-    MesajKuyrugu kuyruk;
-
-    kuyruk.mesajlar = (CAN_Mesaj *)malloc(kapasite * sizeof(CAN_Mesaj));
-
-    if (kuyruk.mesajlar == NULL) {
-        printf("[HATA] Bellek tahsisi basarisiz! Program kapatiliyor.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    kuyruk.kapasite = kapasite;
-    kuyruk.front    = 0;
-    kuyruk.rear     = 0;
-    kuyruk.count    = 0;
-
-    printf("[BILGI] %d kapasiteli dinamik mesaj kuyrugu bellekte olusturuldu!\n\n", kapasite);
-    return kuyruk;
+// Kuyruğu başlatma ve dinamik bellek ayırma 
+void initQueue(MesajKuyrugu *q, int kapasite) {
+    q->kapasite = kapasite;
+    // Dinamik dizi (pointer) ile bellekte alan tahsisi 
+    q->mesajlar = (CAN_Mesaj*)malloc(q->kapasite * sizeof(CAN_Mesaj)); 
+    q->front = 0;
+    q->rear = -1;
+    q->count = 0;
 }
 
-// ─────────────────────────────────────────────
-//  Enqueue — Kuyruğa Mesaj Ekle
-// ─────────────────────────────────────────────
-void enqueue(MesajKuyrugu *kuyruk, CAN_Mesaj mesaj) {
-    // Overflow kontrolü
-    if (kuyruk->count == kuyruk->kapasite) {
-        printf("[HATA] CAN Bus hatti dolu! Kapasite (%d) asildi. Yeni mesaj eklenemez.\n",
-               kuyruk->kapasite);
+// 1. Sensörden Mesaj Üret (Enqueue) 
+void enqueue(MesajKuyrugu *q) {
+    // Sınır Durumu: Kuyruk Taşması (Queue Overflow) 
+    if (q->count == q->kapasite) {
+        printf("[HATA] CAN Bus hattı dolu! Kapasite (%d) aşıldı. Yeni mesaj eklenemez.\n", q->kapasite); // [cite: 66, 102]
         return;
     }
 
-    // Dairesel dizi mantığıyla rear pozisyonuna yaz
-    kuyruk->mesajlar[kuyruk->rear] = mesaj;
+    // Dairesel kuyruk mantığı ile rear indeksini ilerletme
+    q->rear = (q->rear + 1) % q->kapasite;
 
-    // rear'ı bir ilerlet; kapasiteye ulaşınca başa dön (circular buffer)
-    kuyruk->rear = (kuyruk->rear + 1) % kuyruk->kapasite;
-    kuyruk->count++;
+    // Kullanıcıdan mesaj ID'si, veri değeri ve sensör adını alma 
+    printf("Sensör Adı: ");
+    scanf("%s", q->mesajlar[q->rear].gonderen);
+    printf("Mesaj ID: ");
+    scanf("%d", &q->mesajlar[q->rear].mesaj_id);
+    printf("Veri: ");
+    scanf("%f", &q->mesajlar[q->rear].veri);
 
-    printf("[BILGI] Mesaj kuyruga eklendi. (Siradaki mesaj sayisi: %d)\n", kuyruk->count);
+    // Bilgileri CAN_Mesaj haline getirip kuyruğa ekleme ve sayacı artırma 
+    q->count++;
+    printf("[BİLGİ] Mesaj kuyruğa eklendi. (Sıradaki mesaj sayısı: %d)\n", q->count); 
 }
 
-// ─────────────────────────────────────────────
-//  Dequeue — Kuyruktaki İlk Mesajı İşle
-// ─────────────────────────────────────────────
-void dequeue(MesajKuyrugu *kuyruk) {
-    // Underflow kontrolü
-    if (kuyruk->count == 0) {
-        printf("[BILGI] Islenecek yeni mesaj bulunmuyor.\n");
+// 2. Bekleyen İlk Mesajı İşle (Dequeue) 
+void dequeue(MesajKuyrugu *q) {
+    // Sınır Durumu: Boş Kuyruk (Queue Underflow)
+    if (q->count == 0) {
+        printf("[BİLGİ]: İşlenecek yeni mesaj bulunmuyor.\n"); 
         return;
     }
 
-    // front'taki mesajı oku
-    CAN_Mesaj islenen = kuyruk->mesajlar[kuyruk->front];
+    // front sırasındaki mesajı kuyruktan alma 
+    CAN_Mesaj islenen = q->mesajlar[q->front];
 
-    // front'ı bir ilerlet; kapasiteye ulaşınca başa dön
-    kuyruk->front = (kuyruk->front + 1) % kuyruk->kapasite;
-    kuyruk->count--;
-
-    printf("[ISLENDI] %s (ID: %d) sensorunden gelen '%.2f' verisi ana bilgisayar tarafindan islendi.\n",
-           islenen.gonderen, islenen.mesaj_id, islenen.veri);
-    printf("[BILGI] Kuyrukta kalan mesaj sayisi: %d\n", kuyruk->count);
+    // Mesajın içeriğini ekrana yazdırma 
+    printf("[İŞLENDİ] %s (ID: %d) -> Veri: %.2f\n", islenen.gonderen, islenen.mesaj_id, islenen.veri); // [cite: 57, 108]
+    
+    // front indeksini ilerletme ve kuyruktan çıkarma işlemini tamamlama 
+    q->front = (q->front + 1) % q->kapasite;
+    q->count--;
+    
+    printf("[BİLGİ] Kuyrukta kalan mesaj sayısı: %d\n", q->count); 
 }
 
-// ─────────────────────────────────────────────
-//  Print Queue — Bekleyen Mesajları Göster
-// ─────────────────────────────────────────────
-void kuyruk_yazdir(const MesajKuyrugu *kuyruk) {
-    // Underflow kontrolü
-    if (kuyruk->count == 0) {
-        printf("[BILGI] Islenecek yeni mesaj bulunmuyor.\n");
+// 3. Bekleyen Mesajları Göster (Print Queue) 
+void printQueue(MesajKuyrugu *q) {
+    // Kuyruktaki anlık count sayısını yazdırma 
+    printf("\n[BEKLEYEN MESAJLAR Toplam: %d]\n", q->count); 
+    if (q->count == 0) {
         return;
     }
 
-    printf("[BEKLEYEN MESAJLAR - Toplam: %d]\n", kuyruk->count);
-
-    // front'tan başlayıp count kadar ilerle (dairesel)
-    for (int i = 0; i < kuyruk->count; i++) {
-        int index = (kuyruk->front + i) % kuyruk->kapasite;
-        printf("  %d. %s (ID: %d) - Veri: %.2f\n",
-               i + 1,
-               kuyruk->mesajlar[index].gonderen,
-               kuyruk->mesajlar[index].mesaj_id,
-               kuyruk->mesajlar[index].veri);
+    // İşlenecek ilk elemandan (front) başlayarak en son eklenen elemana (rear) kadar dolaşan döngü 
+    for (int i = 0; i < q->count; i++) {
+        int index = (q->front + i) % q->kapasite;
+        printf("%d. %s (ID: %d) Veri: %.2f\n", i + 1, q->mesajlar[index].gonderen, q->mesajlar[index].mesaj_id, q->mesajlar[index].veri); 
     }
 }
 
-// ─────────────────────────────────────────────
-//  Belleği Serbest Bırak
-// ─────────────────────────────────────────────
-void kuyruk_serbest_birak(MesajKuyrugu *kuyruk) {
-    free(kuyruk->mesajlar);      // Dinamik diziyi RAM'e iade et
-    kuyruk->mesajlar = NULL;     // Dangling pointer'ı önle
-    kuyruk->kapasite = 0;
-    kuyruk->front    = 0;
-    kuyruk->rear     = 0;
-    kuyruk->count    = 0;
-    printf("[BILGI] Dinamik bellek (RAM) temizlendi.\n");
+// 4. Sistemi Kapat (Memory Free) [cite: 62]
+void freeQueue(MesajKuyrugu *q) {
+    // Dinamik olarak ayrılan belleği RAM'e iade etme 
+    free(q->mesajlar);
 }

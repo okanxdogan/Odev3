@@ -1,63 +1,28 @@
 #ifndef CAN_QUEUE_H
 #define CAN_QUEUE_H
 
-// ─────────────────────────────────────────────
-//  Struct Tanımlamaları
-// ─────────────────────────────────────────────
-
-// Tek bir sensör mesajının yapısı
+// 1. Tek bir sensör mesajının yapısı 
 typedef struct {
-    int   mesaj_id;      // Örn: 101 (Hız), 202 (Batarya)
-    float veri;          // Örn: 45.5 (Derece veya km/s)
-    char  gonderen[30];  // Örn: "Motor_Sicaklik_Sensoru"
+    int mesaj_id;          // mesaj ID'si 
+    float veri;            // veri  
+    char gonderen[30];     // gönderen sensör adı 
 } CAN_Mesaj;
 
-// Mesajların beklediği kuyruk yapısı (Dinamik Dizi ile)
+// 2. Mesajların beklediği kuyruk yapısı 
 typedef struct {
-    CAN_Mesaj *mesajlar; // Dinamik olarak tahsis edilecek dizi pointer'ı
-    int kapasite;        // Kullanıcının belirlediği maksimum kapasite
-    int front;           // Kuyruğun başı (işlenecek ilk mesajın indeksi)
-    int rear;            // Kuyruğun sonu (yeni eklenecek mesajın indeksi)
-    int count;           // Kuyruktaki anlık mesaj sayısı
+    CAN_Mesaj *mesajlar;    // dinamik dizi pointer'ı 
+    int kapasite;           // maksimum kapasite 
+    int front;              // kuyruğun başı 
+    int rear;               // kuyruğun sonu 
+    int count;              // anlık mesaj sayısı 
 } MesajKuyrugu;
 
-// ─────────────────────────────────────────────
-//  Fonksiyon Prototipleri
-// ─────────────────────────────────────────────
+// --- Fonksiyon Prototipleri ---
 
-/**
- * @brief  Dinamik bellek tahsisi yaparak kuyruğu başlatır.
- * @param  kapasite  Kuyruğun tutabileceği maksimum mesaj sayısı.
- * @return Başarıyla oluşturulan MesajKuyrugu nesnesi.
- */
-MesajKuyrugu kuyruk_olustur(int kapasite);
+void initQueue(MesajKuyrugu *q, int kapasite); // bellek ayırma (malloc) 
+void enqueue(MesajKuyrugu *q);                // ekleme 
+void dequeue(MesajKuyrugu *q);                // çıkarma 
+void printQueue(MesajKuyrugu *q);              // yazdırma 
+void freeQueue(MesajKuyrugu *q);               // bellek temizleme (free) 
 
-/**
- * @brief  Kuyruğa yeni bir CAN mesajı ekler (Enqueue).
- *         Kuyruk doluysa hata mesajı basar.
- * @param  kuyruk  İşlem yapılacak kuyruk pointer'ı.
- * @param  mesaj   Eklenecek CAN_Mesaj nesnesi.
- */
-void enqueue(MesajKuyrugu *kuyruk, CAN_Mesaj mesaj);
-
-/**
- * @brief  Kuyruktaki ilk mesajı çıkarır ve işler (Dequeue).
- *         Kuyruk boşsa uyarı mesajı basar.
- * @param  kuyruk  İşlem yapılacak kuyruk pointer'ı.
- */
-void dequeue(MesajKuyrugu *kuyruk);
-
-/**
- * @brief  Kuyruktaki tüm mesajları front'tan rear'a sırayla ekrana basar.
- *         Kuyruk boşsa uyarı mesajı basar.
- * @param  kuyruk  İşlem yapılacak kuyruk pointer'ı.
- */
-void kuyruk_yazdir(const MesajKuyrugu *kuyruk);
-
-/**
- * @brief  malloc ile ayrılan dinamik belleği serbest bırakır.
- * @param  kuyruk  İşlem yapılacak kuyruk pointer'ı.
- */
-void kuyruk_serbest_birak(MesajKuyrugu *kuyruk);
-
-#endif /* CAN_QUEUE_H */
+#endif
